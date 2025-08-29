@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>ARデモ</title>
+    <script src="mindar/aframe.min.js"></script>
+    <script src="mindar/mindar-image.prod.js"></script>
+  </head>
+  <body>
+    <a-scene mindar-image="imageTargetSrc: http://gcd.main.jp/Yamamori_AR/yamakimbeam/targets.mind;"
+             embedded
+             color-space="sRGB"
+             vr-mode-ui="enabled: false"
+             device-orientation-permission-ui="enabled: true">
+
+      <!-- ライト -->
+      <a-entity light="type: directional; intensity: 0.8" position="0 2 2"></a-entity>
+      <a-entity light="type: ambient; intensity: 0.5"></a-entity>
+
+      <!-- 3Dモデル -->
+      <a-entity mindar-image-target="targetIndex: 0">
+        <a-gltf-model src="#model" position="0 0 0" scale="0.5 0.5 0.5" rotation="0 180 0"></a-gltf-model>
+      </a-entity>
+
+      <!-- アセット -->
+      <a-assets>
+        <a-asset-item id="model" src="model.glb"></a-asset-item>
+      </a-assets>
+
+      <a-camera position="0 0 0" look-controls="enabled: true"></a-camera>
+    </a-scene>
+  </body>
+</html>
