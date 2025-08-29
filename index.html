@@ -40,14 +40,17 @@
   const scene = document.querySelector('a-scene');
   const startButton = document.getElementById('startButton');
 
-  startButton.addEventListener('click', async () => {
-    try {
-      await scene.components['mindar-image'].start();
-      startButton.style.display = 'none';
-    } catch(e) {
-      alert('カメラ起動に失敗しました: ' + e);
-      console.error(e);
-    }
+  // scene が完全にロードされてからボタンにイベントを追加
+  scene.addEventListener('loaded', () => {
+    startButton.addEventListener('click', async () => {
+      try {
+        await scene.components['mindar-image'].start();
+        startButton.style.display = 'none';
+      } catch(e) {
+        alert('カメラ起動に失敗しました: ' + e);
+        console.error(e);
+      }
+    });
   });
 </script>
 
