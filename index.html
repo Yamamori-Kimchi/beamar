@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Duck Stabilized & Rotatable</title>
+  <title>Duck Stable Rotation</title>
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/aframe-gesture-detector@3.0.0/dist/aframe-gesture-detector.min.js"></script>
@@ -14,20 +14,20 @@
 </head>
 <body>
   <a-scene
-    mindar-image="imageTargetSrc: targets.mind; filterMinCF:0.0001; filterBeta:0.15;"
+    mindar-image="imageTargetSrc: targets.mind; filterMinCF:0.0001; filterBeta:0.2;"
     embedded
     vr-mode-ui="enabled:false"
     device-orientation-permission-ui="enabled:true"
   >
-    <!-- マーカー中心に固定 -->
+    <!-- マーカー追従 -->
     <a-entity mindar-image-target="targetIndex:0">
-      <!-- モデル本体は子エンティティ -->
-      <a-entity id="duckModel" gesture-detector rotation="0 0 0">
+      <!-- 子エンティティにモデル配置（回転はここだけ） -->
+      <a-entity id="duckModel" position="0 0 0">
         <a-gltf-model
           src="https://cdn.jsdelivr.net/gh/KhronosGroup/glTF-Sample-Models@master/2.0/Duck/glTF-Binary/Duck.glb"
           scale="0.5 0.5 0.5"
-          position="0 0 0"
-          rotation="0 0 0">
+          rotation="0 0 0"
+          position="0 0 0">
         </a-gltf-model>
       </a-entity>
     </a-entity>
@@ -36,11 +36,29 @@
   </a-scene>
 
   <script>
-    const duck = document.querySelector("#duckModel");
+    const duck = document.querySelector("#duckModel").object3D;
+    const duckParent = duck.parent;
+
+    let currentPos = new THREE.Vector3();
+    let targetPos = new THREE.Vector3();
+
+    // 毎フレームで位置を補間（ブルブル防止）
+    AFRAME.scenes[0].addEventListener("renderstart", () => {
+      AFRAME.scenes[0].renderer.setAnimationLoop(() => {
+        if(duckParent){
+          targetPos.copy(duckParent.position);
+          currentPos.lerp(targetPos, 0.2); // 0.2で滑らか追従
+          duck.position.copy(currentPos);
+        }
+      });
+    });
+
+    // タッチ回転（モデル中心のみ）
     document.querySelector("a-scene").addEventListener("onefingermove", (e) => {
-      if (e.detail.positionChange) {
-        duck.object3D.rotation.y += e.detail.positionChange.x * 0.01;
-        duck.object3D.rotation.x += e.detail.positionChange.y * 0.01;
+      if(e.detail.positionChange){
+        duck.rotation.y += e.detail.positionChange.x * 0.01;
+        // 上下回転を無効にしたい場合は下行コメントアウト
+        // duck.rotation.x += e.detail.positionChange.y * 0.01;
       }
     });
   </script>
